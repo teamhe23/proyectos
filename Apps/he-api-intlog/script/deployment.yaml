@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name:  {{name-deployment}}
+  labels:
+    app:  {{name-deployment}}
+spec:
+  selector:
+    matchLabels:
+      app: {{name-deployment}}
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app:  {{name-deployment}}
+      annotations:
+        repo: https://dev.azure.com/promartec/proy-promartec-intlog/_git/he-api-intlog
+        swagger: /swagger
+    spec:
+      containers:
+      - name:  {{name-deployment}}
+        env:
+        - name: Setting__TiempoEsperaBdSegundos
+          value: "600"
+        - name: Oracle__DataSource
+          valueFrom:
+            configMapKeyRef:
+              key: DataSource
+              name: he-oracle
+        - name: Oracle__User
+          valueFrom:
+            configMapKeyRef:
+              key: User
+              name: he-oracle
+        - name: Oracle__Password
+          valueFrom:
+            secretKeyRef:
+              key: Password
+              name: he-oracle
+        image: promartec.azurecr.io/he-api-integraciones-logistica:{{Build.BuildId}}
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort:  80
+          name:  port80
+      imagePullSecrets:
+      - name: azurehe
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{name-deployment}}-nodeport
+spec:
+  type: NodePort
+  selector:
+    app: {{name-deployment}}
+  ports:
+    - port: 80
+      targetPort: 80

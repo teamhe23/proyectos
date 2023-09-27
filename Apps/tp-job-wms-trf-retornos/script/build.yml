@@ -1,0 +1,48 @@
+stages:
+#Compilacion de codigo
+#start
+- stage: BuildCode
+  jobs:
+  - job: Build_Code
+    pool:
+      vmImage: 'ubuntu-22.04'
+    continueOnError: false
+    steps:
+    - script: |
+        dotnet tool install --global dotnet-sonarscanner --version 5.4.1
+        dotnet sonarscanner begin /k:"$(name-deployment)" /d:sonar.host.url="$(Sonar.Url)" /d:sonar.login="$(Sonar.Login)" /d:sonar.cs.opencover.reportsPaths="**/*.opencover.xml" /d:sonar.coverage.exclusions="**Tests*.cs" /d:sonar.language="cs"
+      displayName: Install dotnet-sonarscanner & SonarQube Prepare
+
+    - script: |
+        dotnet publish src/Facade -c Release -o '$(Build.ArtifactStagingDirectory)'
+      displayName: Build and publish Projects
+
+    - script: dotnet sonarscanner end  /d:sonar.login="$(Sonar.Login)"
+      displayName: SonarQube Publish
+
+    - task: Docker@2
+      displayName: Build/Push Docker Image
+      inputs:
+        containerRegistry: 'cr_tpsahub'
+        repository: '$(name-deployment)'
+        command: 'buildAndPush'
+        Dockerfile: '$(Build.ArtifactStagingDirectory)/Dockerfile'
+        tags: $(Build.BuildId)
+
+    - task: qetza.replacetokens.replacetokens-task.replacetokens@5
+      displayName: 'Replace tokens in deployment.yaml'
+      inputs:
+        targetFiles: 'script/*.yaml'
+        tokenPattern: doublebraces
+
+    - task: CopyFiles@2
+      inputs:
+        Contents: script/*.yaml
+        targetFolder: '$(Build.ArtifactStagingDirectory)'
+
+    - task: PublishPipelineArtifact@1
+      displayName: 'Publish Pipeline Artifact'
+      inputs:
+        targetPath: '$(Build.ArtifactStagingDirectory)/script'
+        artifact: 'ExecutableSL'
+#end

@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name:  {{name-deployment}}
+  labels:
+    app:  {{name-deployment}}
+spec:
+  selector:
+    matchLabels:
+      app: {{name-deployment}}
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app:  {{name-deployment}}
+      annotations:
+        repo: https://oechslepe.visualstudio.com/INTEGRACION%20WMS%20-%20APIs/_git/tp-job-wms-sucursales
+    spec:
+      containers:
+      - name:  {{name-deployment}}
+        env:
+          #- name: TZ
+          #  value: America/Lima
+        - name: api__wms__Password
+          valueFrom:
+            secretKeyRef:
+              key: Password
+              name: api-wms
+        - name: api__wms__Url
+          valueFrom:
+            configMapKeyRef:
+              key: Url
+              name: api-wms
+        - name: api__wms__User
+          valueFrom:
+            configMapKeyRef:
+              key: User
+              name: api-wms
+        - name: db__oracle__Password
+          valueFrom:
+            secretKeyRef:
+              key: Password
+              name: tp-db
+        - name: db__oracle__DataSource
+          valueFrom:
+            configMapKeyRef:
+              key: DataSource
+              name: tp-db
+        - name: db__oracle__User
+          valueFrom:
+            configMapKeyRef:
+              key: User
+              name: tp-db
+        - name: Settigns__TiempoEsperaSegundos
+          valueFrom:
+            configMapKeyRef:
+              key: TiempoEsperaSegundos
+              name: settigns
+        image:  tpsahub.azurecr.io/{{name-deployment}}:{{Build.BuildId}}
+        imagePullPolicy: IfNotPresent
+      imagePullSecrets:
+      - name: azuretpv2

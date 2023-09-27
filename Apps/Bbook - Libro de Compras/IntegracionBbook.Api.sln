@@ -1,0 +1,35 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32602.215
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{B55F3C83-3593-4A12-81C1-CBF5CE6F49A1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Facade", "src\Facade\Facade.csproj", "{026DC78B-5AEA-4CF3-99DF-E3573FC3C250}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "script", "script", "{5194E9AC-B1F7-404B-9E42-5EF5B2E0201F}"
+	ProjectSection(SolutionItems) = preProject
+		script\build.yml = script\build.yml
+		script\deployment.yaml = script\deployment.yaml
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{026DC78B-5AEA-4CF3-99DF-E3573FC3C250}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{026DC78B-5AEA-4CF3-99DF-E3573FC3C250}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{026DC78B-5AEA-4CF3-99DF-E3573FC3C250}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{026DC78B-5AEA-4CF3-99DF-E3573FC3C250}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{026DC78B-5AEA-4CF3-99DF-E3573FC3C250} = {B55F3C83-3593-4A12-81C1-CBF5CE6F49A1}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {882E53F3-ACB2-48FF-8D3A-4A89BFC22DA3}
+	EndGlobalSection
+EndGlobal

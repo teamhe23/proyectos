@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name:  {{name-deployment}}
+  labels:
+    app:  {{name-deployment}}
+spec:
+  selector:
+    matchLabels:
+      app: {{name-deployment}}
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app:  {{name-deployment}}
+      annotations:
+        repo: https://oechslepe.visualstudio.com/Bbook%20-%20Libro%20de%20Compras/_git/Bbook%20-%20Libro%20de%20Compras?path=%2F&version=GBmaster&_a=contents
+        swagger: /swagger
+    spec:
+      containers:
+      - name:  {{name-deployment}}
+        env:
+        - name: Bbook__url
+          valueFrom:
+            configMapKeyRef:
+              key: url
+              name: tp-bbook
+        - name: Bbook__token
+          valueFrom:
+            secretKeyRef:
+              key: token
+              name: tp-bbook
+
+        - name: DB__DataSource
+          valueFrom:
+            configMapKeyRef:
+              key: DataSource
+              name: tp-oracle
+        - name: DB__UserID
+          valueFrom:
+            configMapKeyRef:
+              key: UserID
+              name: tp-oracle
+        - name: DB__Password
+          valueFrom:
+            secretKeyRef:
+              key: Password
+              name: tp-oracle
+ 
+        image:  tpsahub.azurecr.io/tp-api-bbook-integration:{{Build.BuildId}}
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort:  80
+          name:  port80
+      imagePullSecrets:
+      - name: azuretpv2
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{name-deployment}}-nodeport
+spec:
+  type: NodePort
+  selector:
+    app: {{name-deployment}}
+  ports:
+    - port: 80
+      targetPort: 80

@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name:  {{name-deployment}}
+  labels:
+    app:  {{name-deployment}}
+spec:
+  selector:
+    matchLabels:
+      app: {{name-deployment}}
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app:  {{name-deployment}}
+      annotations:
+        repo: https://dev.azure.com/promartec/proy-promartec-wms/_git/he-demon-pubsub-wms-suscriptor
+    spec:
+      containers:
+      - name:  {{name-deployment}}
+        env:
+        - name: OracleDatabase__DataSource
+          valueFrom:
+            configMapKeyRef:
+              key: DataSource
+              name: he-oracle
+        - name: OracleDatabase__User
+          valueFrom:
+            configMapKeyRef:
+              key: User
+              name: he-oracle
+        - name: OracleDatabase__Password
+          valueFrom:
+            secretKeyRef:
+              key: Password
+              name: he-oracle
+        - name: PubSub__Proyecto
+          valueFrom:
+            configMapKeyRef:
+              key: Proyecto
+              name: he-pubsub
+        - name: PubSub__Suscripcion
+          valueFrom:
+            configMapKeyRef:
+              key: Suscripcion
+              name: he-pubsub
+        - name: Settings__TiempoEsperaSegundos
+          value: "10"
+        - name: Settings__RutaGCPCredenciales
+          value: "/var/secrets/gcp/CredencialesGCP.json"
+        volumeMounts:
+        - mountPath: /var/secrets/gcp
+          name: he-vol-gcp
+        image: promartec.azurecr.io/he-demon-pubsub-wms-suscriptor:{{Build.BuildId}}
+        imagePullPolicy: IfNotPresent
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "250Mi"
+            cpu: "210m"
+      imagePullSecrets:
+      - name: azurehe
+      volumes:
+      - name: he-vol-gcp
+        secret:
+          defaultMode: 400
+          optional: false
+          secretName: he-gcp-account-service

@@ -1,0 +1,35 @@
+stages:
+#Compilacion de codigo
+#start
+- stage: BuildCode
+  jobs:
+  - job: Build_Code
+    pool:
+      vmImage: 'ubuntu-22.04'
+    continueOnError: false
+    steps:
+    - script: |
+        dotnet publish 'src\Facade' -c Release -o '$(Build.ArtifactStagingDirectory)'
+      displayName: Build and publish Projects
+
+    - task: Docker@2
+      displayName: Build/Push Docker Image
+      inputs:
+        containerRegistry: 'he-azure-reg'
+        repository: 'he-demon-pubsub-wms-suscriptor'
+        command: 'buildAndPush'
+        Dockerfile: '$(Build.ArtifactStagingDirectory)/Dockerfile'
+        tags: $(Build.BuildId)
+
+    - task: qetza.replacetokens.replacetokens-task.replacetokens@5
+      displayName: 'Replace tokens in deployment.yaml'
+      inputs:
+        targetFiles: 'script/deployment.yaml'
+        tokenPattern: doublebraces
+
+    - task: PublishPipelineArtifact@1
+      displayName: 'Publish Pipeline Artifact'
+      inputs:
+        targetPath: 'script/deployment.yaml'
+        artifact: 'ExecutableSL'
+#end
