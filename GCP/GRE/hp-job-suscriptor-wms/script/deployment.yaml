@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name:  {{name-deployment}}
+  labels:
+    app:  {{name-deployment}}
+spec:
+  selector:
+    matchLabels:
+      app: {{name-deployment}}
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app:  {{name-deployment}}
+      annotations:
+        repo: https://promartpe.visualstudio.com/Guias%20de%20Remision/_git/hp-job-suscriptor-wms
+    spec:
+      containers:
+      - name:  {{name-deployment}}
+        env:
+        - name: Oracle__DataSource
+          valueFrom:
+            configMapKeyRef:
+              key: DataSource
+              name: hp-oracle
+        - name: Oracle__User
+          valueFrom:
+            configMapKeyRef:
+              key: User
+              name: hp-oracle
+        - name: Oracle__Password
+          valueFrom:
+            secretKeyRef:
+              key: Password
+              name: hp-oracle
+        - name: Settigns__TiempoEsperaSegundos
+          value: "10"
+        - name: Settigns__RutaGCPCredenciales
+          value: "/var/secrets/gcp/CredencialesGCP.json"
+        - name: PubSub__Proyecto
+          valueFrom:
+            configMapKeyRef:
+              key: Proyecto
+              name: hp-pubsub
+        - name: PubSub__Suscripcion
+          valueFrom:
+            configMapKeyRef:
+              key: Suscripcion
+              name: hp-pubsub
+        volumeMounts:
+        - mountPath: /var/secrets/gcp
+          name: hp-vol-gcp
+        image:  hpsahub.azurecr.io/hp-gre-job-suscriptor-wms:{{Build.BuildId}}
+        imagePullPolicy: IfNotPresent
+      imagePullSecrets:
+      - name: azurehpv2
+      volumes:
+      - name: hp-vol-gcp
+        secret:
+          defaultMode: 400
+          optional: false
+          secretName: hp-gcp-account-service
